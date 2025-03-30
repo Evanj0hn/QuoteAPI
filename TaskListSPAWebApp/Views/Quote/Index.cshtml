@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "All Quotes";
+}
+
+<h2>All Quotes</h2>
+
+<div id="quotes"></div>
+
+@section Scripts {
+    <script>
+        const BASE_URL = "https://localhost:7228/api/quoteapi";
+
+        async function loadQuotes() {
+            try {
+                const res = await fetch(BASE_URL);
+                const data = await res.json();
+                const container = document.getElementById("quotes");
+                container.innerHTML = "";
+
+                data.forEach(quote => {
+                    const quoteDiv = document.createElement("div");
+                    quoteDiv.className = "border rounded p-3 mb-3";
+                    quoteDiv.innerHTML = `
+                                <p>"${quote.text}"</p>
+                                <p class="text-muted">— ${quote.author || "Unknown"}</p>
+                                <p><strong>Likes:</strong> ${quote.likes}</p>
+                                <button class="btn btn-sm btn-outline-success" onclick="likeQuote(${quote.id})">Like</button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editQuote(${quote.id}, \`${quote.text}\`, \`${quote.author || ""}\`)">Edit</button>
+                                <hr>
+                            `;
+                    container.appendChild(quoteDiv);
+                });
+            } catch (err) {
+                document.getElementById("quotes").innerHTML = `<p class="text-danger">Error loading quotes: ${err}</p>`;
+            }
+        }
+
+        async function likeQuote(id) {
+            const res = await fetch(`${BASE_URL}/${id}/like`, { method: "POST" });
+            if (res.ok) {
+                loadQuotes(); // reload quotes to update like count
+            }
+        }
+
+        async function editQuote(id, currentText, currentAuthor) {
+            const newText = prompt("Update quote text:", currentText);
+            if (!newText) return;
+
+            const newAuthor = prompt("Update author:", currentAuthor);
+
+            const updatedQuote = {
+                text: newText,
+                author: newAuthor,
+                tags: [] // Optional: update this if you want tag editing
+            };
+
+            const res = await fetch(`${BASE_URL}/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(updatedQuote)
+            });
+
+            if (res.ok) {
+                loadQuotes();
+            } else {
+                alert("Failed to update quote");
+            }
+        }
+
+        loadQuotes();
+    </script>
+}

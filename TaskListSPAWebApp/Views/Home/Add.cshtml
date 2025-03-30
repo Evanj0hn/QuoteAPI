@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Add Quote";
+}
+
+<h2>Add a New Quote</h2>
+
+<form id="quoteForm">
+    <div>
+        <label for="text">Quote Text:</label><br />
+        <textarea id="text" name="text" rows="4" cols="50" required></textarea>
+    </div>
+    <div>
+        <label for="author">Author:</label><br />
+        <input type="text" id="author" name="author" />
+    </div>
+    <div>
+        <label for="tags">Tags (comma separated):</label><br />
+        <input type="text" id="tags" name="tags" />
+    </div>
+    <br />
+    <button type="submit">Add Quote</button>
+</form>
+
+<p id="message"></p>
+
+@section Scripts {
+    <script>
+        document.getElementById('quoteForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const quote = {
+                text: document.getElementById('text').value,
+                author: document.getElementById('author').value,
+                tags: document.getElementById('tags').value.split(',').map(t => t.trim())
+            };
+
+            const response = await fetch('https://localhost:7228/api/quoteapi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Replace below with your real token if authentication is required
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                },
+                body: JSON.stringify(quote)
+            });
+
+            if (response.ok) {
+                document.getElementById('message').innerText = 'Quote added!';
+                document.getElementById('quoteForm').reset();
+            } else {
+                const error = await response.text();
+                document.getElementById('message').innerText = 'Error: ' + error;
+            }
+        });
+    </script>
+}

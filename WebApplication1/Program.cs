@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Cors;
 using System.Text;
 using QuoteApi.Entities;
 
@@ -45,8 +46,18 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["validIssuer"],
         ValidAudience = jwtSettings["validAudience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-
     };
+});
+
+// --- CORS CONFIGURATION --- 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSPAClient", policy =>
+    {
+        policy.WithOrigins("http://localhost:5291") // Your SPA project URL
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
 // --- MVC CONTROLLERS ---
@@ -66,6 +77,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCors("AllowSPAClient"); // Enable CORS here
 
 app.UseAuthentication(); // Add this BEFORE UseAuthorization
 app.UseAuthorization();
