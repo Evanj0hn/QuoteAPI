@@ -203,6 +203,22 @@ namespace QuoteApi.Controllers
 
             return Ok(quotes);
         }
+
+        // GET: api/quoteapi/tags
+        [HttpGet("tags")]
+        public async Task<IActionResult> GetAllTags()
+        {
+            var tags = await _context.Tags
+                .Select(t => t.Name)
+                .Distinct()
+                .OrderBy(t => t)
+                .ToListAsync();
+
+            return Ok(tags);
+        }
+
+
+
     }
 
     public class QuoteRequest

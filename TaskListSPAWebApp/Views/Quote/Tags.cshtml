@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "All Tags";
+}
+
+<h2>All Tags</h2>
+
+<ul id="tagList"></ul>
+
+@section Scripts {
+    <script>
+        async function loadTags() {
+            const res = await fetch("https://localhost:7228/api/quoteapi/tags");
+            const tags = await res.json();
+
+            const list = document.getElementById("tagList");
+            tags.forEach(tag => {
+                const li = document.createElement("li");
+                li.textContent = tag;
+                list.appendChild(li);
+            });
+        }
+
+        loadTags();
+    </script>
+}

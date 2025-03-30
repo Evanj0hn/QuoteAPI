@@ -21,13 +21,14 @@
                     const quoteDiv = document.createElement("div");
                     quoteDiv.className = "border rounded p-3 mb-3";
                     quoteDiv.innerHTML = `
-                                <p>"${quote.text}"</p>
-                                <p class="text-muted">— ${quote.author || "Unknown"}</p>
-                                <p><strong>Likes:</strong> ${quote.likes}</p>
-                                <button class="btn btn-sm btn-outline-success" onclick="likeQuote(${quote.id})">Like</button>
-                                <button class="btn btn-sm btn-outline-primary" onclick="editQuote(${quote.id}, \`${quote.text}\`, \`${quote.author || ""}\`)">Edit</button>
-                                <hr>
-                            `;
+                      <p><strong>ID: ${quote.id}</strong></p>
+                      <p>"${quote.text}"</p>
+                      <p class="text-muted">— ${quote.author || "Unknown"}</p>
+                      <p><strong>Likes:</strong> ${quote.likes}</p>
+                      <button class="btn btn-sm btn-outline-success" onclick="likeQuote(${quote.id})">Like</button>
+                      <button class="btn btn-sm btn-outline-primary" onclick="editQuote(${quote.id}, \`${quote.text}\`, \`${quote.author || ""}\`)">Edit</button>
+                      <hr>
+                     `;
                     container.appendChild(quoteDiv);
                 });
             } catch (err) {

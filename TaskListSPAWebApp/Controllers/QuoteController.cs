@@ -19,6 +19,18 @@ namespace TaskListSPAWebApp.Controllers
             return View();
         }
 
+        public IActionResult Tags()
+        {
+            return View();
+        }
+
+        public IActionResult Details()
+        {
+            return View();
+        }
+
+
+
 
     }
 }

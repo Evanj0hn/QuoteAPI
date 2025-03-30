@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Find Quote by ID";
+}
+
+<h2>Find Quote by ID</h2>
+
+<div class="mb-3">
+    <input id="quoteIdInput" class="form-control" type="number" placeholder="Enter quote ID..." />
+</div>
+
+<div class="mb-3">
+    <button class="btn btn-primary" onclick="fetchQuoteById()">Get Quote</button>
+</div>
+
+<div id="quoteDetails"></div>
+
+@section Scripts {
+    <script>
+        async function fetchQuoteById() {
+            const id = document.getElementById("quoteIdInput").value;
+            if (!id) return alert("Please enter a quote ID.");
+
+            const res = await fetch(`https://localhost:7228/api/quoteapi/${id}`);
+            const container = document.getElementById("quoteDetails");
+            container.innerHTML = "";
+
+            if (res.status === 404) {
+                container.innerHTML = "<p class='text-danger'>Quote not found.</p>";
+                return;
+            }
+
+            const q = await res.json();
+            container.innerHTML = `
+                <div class="border rounded p-3 mb-3">
+                    <p>"${q.text}"</p>
+                    <p class="text-muted">— ${q.author || "Unknown"}</p>
+                    <p><strong>Likes:</strong> ${q.likes}</p>
+                    <p><strong>Tags:</strong> ${q.tags.join(", ")}</p>
+                </div>
+            `;
+        }
+    </script>
+}
