@@ -219,6 +219,16 @@ namespace QuoteApi.Controllers
 
 
 
+        [HttpDelete("dev/clear")]
+        public async Task<IActionResult> ClearAllQuotes()
+        {
+            var allQuotes = _context.Quotes;
+            _context.Quotes.RemoveRange(allQuotes);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "All quotes deleted" });
+        }
+
     }
 
     public class QuoteRequest

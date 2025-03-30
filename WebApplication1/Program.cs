@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Cors;
 using System.Text;
 using QuoteApi.Entities;
+using Microsoft.OpenApi.Models; // Added for Swagger
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +64,17 @@ builder.Services.AddCors(options =>
 // --- MVC CONTROLLERS ---
 builder.Services.AddControllersWithViews();
 
+// --- SWAGGER CONFIGURATION ---
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Quotes API",
+        Version = "v1"
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -82,6 +94,14 @@ app.UseCors("AllowSPAClient"); // Enable CORS here
 
 app.UseAuthentication(); // Add this BEFORE UseAuthorization
 app.UseAuthorization();
+
+// --- SWAGGER MIDDLEWARE ---
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Quotes API V1");
+    c.RoutePrefix = "swagger"; // URL will be /swagger
+});
 
 app.MapControllerRoute(
     name: "default",
