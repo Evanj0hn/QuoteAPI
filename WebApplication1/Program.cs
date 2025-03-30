@@ -1,6 +1,55 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using QuoteApi.Entities;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<QuotesDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("QuotesDb")));
+
+// --- IDENTITY CONFIGURATION ---
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 6;
+})
+.AddEntityFrameworkStores<QuotesDbContext>()
+.AddDefaultTokenProviders();
+
+// --- JWT CONFIGURATION ---
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = Environment.GetEnvironmentVariable("SECRET");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    Console.WriteLine($"SECRET = {secretKey}");
+
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["validIssuer"],
+        ValidAudience = jwtSettings["validAudience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+
+    };
+});
+
+// --- MVC CONTROLLERS ---
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -9,7 +58,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // The default HSTS value is 30 days. 
     app.UseHsts();
 }
 
@@ -18,6 +67,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication(); // Add this BEFORE UseAuthorization
 app.UseAuthorization();
 
 app.MapControllerRoute(
