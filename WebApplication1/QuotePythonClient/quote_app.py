@@ -1,11 +1,42 @@
 ﻿import requests
 import random
 
-BASE_URL = "https://localhost:7228/api/quoteapi" # Replace port
+BASE_URL = "https://localhost:7228/api/quoteapi"  # Replace port
 
 # Ignore SSL warning (for local testing only)
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def load_quotes_from_file():
+    file_path = "bulk_quotes.txt"
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        for line in lines:
+            if "--" not in line:
+                continue
+
+            parts = line.strip().split("--")
+            text = parts[0].strip().strip('"')
+            author = parts[1].strip() if len(parts) > 1 else "Unknown"
+
+            quote_data = {
+                "text": text,
+                "author": author,
+                "tags": []
+            }
+
+            res = requests.post(f"{BASE_URL}", json=quote_data, verify=False)
+            if res.status_code == 201:
+                print(f"Added: \"{text}\"")
+            else:
+                print(f"Failed: \"{text}\" | Status: {res.status_code}")
+
+    except FileNotFoundError:
+        print("File not found: bulk_quotes.txt")
+
 
 def load_quotes():
     response = requests.get(BASE_URL, verify=False)
@@ -34,7 +65,6 @@ def add_quote():
         print("Status code:", response.status_code)
         print("Response:", response.text)
 
-
 def random_quote():
     quotes = load_quotes()
     if quotes:
@@ -44,21 +74,24 @@ def random_quote():
 
 def main():
     while True:
-        print("\n1. View all quotes")
-        print("2. Add a quote")
-        print("3. Show a random quote")
-        print("4. Exit")
+        print("\n1. Load quotes from file")
+        print("2. View all quotes")
+        print("3. Add a quote")
+        print("4. Show a random quote")
+        print("5. Exit")
 
         choice = input("Choose an option: ")
         if choice == "1":
+            load_quotes_from_file()
+        elif choice == "2":
             quotes = load_quotes()
             for q in quotes:
-                print(f'[{q["id"]}] "{q["text"]}" - {q.get("author", "Unknown")} ❤️ {q["likes"]} likes')
-        elif choice == "2":
-            add_quote()
+                print(f'[{q["id"]}] "{q["text"]}" - {q.get("author", "Unknown")} {q["likes"]} likes')
         elif choice == "3":
-            random_quote()
+            add_quote()
         elif choice == "4":
+            random_quote()
+        elif choice == "5":
             break
         else:
             print("Invalid option.")
